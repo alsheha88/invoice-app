@@ -5,7 +5,7 @@ export default function Home() {
     <div className="">
       <main className="">
           Main Page
-          <Button variant={"primary"} className="">Hello</Button>
+          <Button variant={"tertiary"}>Hello</Button>
       </main>
     </div>
   );

@@ -15,6 +15,7 @@
 	--muted: hsl(231, 20%, 61%);
 	--destructive: hsl(0, 80%, 63%);
 	--destructive-hover: hsl(0, 100%, 80%);
+	--destructive-foreground: hsla(0, 0%, 100%, 1);
 	--success: hsl(160, 67%, 52%);
 	--pending: hsl(34, 100%, 50%);
   --draft: hsl(240, 27%, 98%);
@@ -40,6 +41,7 @@
 	--color-muted: var(--muted);
 	--color-destructive: var(--destructive);
 	--color-destructive-hover: var(--destructive-hover);
+  --color-destructive-foreground: var(--destructive-foreground);
 	--color-success: var(--success);
 	--color-pending: var(--pending);
   --color-draft: var(--draft);
