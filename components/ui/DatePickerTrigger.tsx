@@ -8,7 +8,7 @@ type Props = {
     setIsOpen: Dispatch<SetStateAction<boolean>>
 }
 function DatePickerTrigger({selectedDate, setIsOpen, isOpen}:Props) {
-    const selectedDay = selectedDate?.getDate()
+    const selectedDay = selectedDate?.getDate();
     const selectedMonth = selectedDate?.getMonth();
     const selectedYear = selectedDate?.getFullYear();
 	return (
