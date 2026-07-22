@@ -1,24 +1,15 @@
-import { Button } from "@/components/ui/Button";
-import DatePicker from "@/components/ui/DatePicker";
-import DatePickerDropdown from "@/components/ui/DatePickerDropdown";
-import DatePickerTrigger from "@/components/ui/DatePickerTrigger";
-import Dropdown from "@/components/ui/PaymentTermDropdown";
-import DropdownTrigger from "@/components/ui/PaymentTermDropdownTrigger";
-import TextInput from "@/components/ui/TextInput";
+import InvoicesClient from "@/components/InvoicesClient";
+import data from '@/lib/data.json'
+import { InvoicesData, invoicesSchema } from "@/schemas/schemas";
 
-export default function Home() {
+
+export default async function Home() {
+	const invoices:InvoicesData = invoicesSchema.parse(data);
 	return (
-		<div className="grid place-items-center">
-			<main className="">
-				Main Page
-				<Button variant={"destructive"} className="">
-					Button
-				</Button>
-				<TextInput label="Client name" />
-				<div className="relative max-w-max">
-					<DropdownTrigger />
-				</div>
-				<DatePicker />
+		<div className="w-full min-h-dvh">
+			<main className="grid max-w-6xl py-16 px-6 md:px-12 mx-auto">
+				<InvoicesClient invoices={invoices} />
+				
 			</main>
 		</div>
 	);
