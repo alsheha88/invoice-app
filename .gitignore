@@ -44,3 +44,10 @@ next-env.d.ts
 *.sketch
 *.fig
 *.xd
+/lib/generated/prisma
+
+#Prisma
+.claude/
+.windsurf/
+.agents/
+/generated/prisma

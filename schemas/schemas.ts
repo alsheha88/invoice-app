@@ -52,11 +52,9 @@ const itemInputSchema = z.object({
 export const sendSchema = z.object({
 	senderAddress: strictAddress,
 	createdAt: z.string(),
-
 	clientName: z.string().min(1),
 	clientEmail: z.email(),
 	clientAddress: strictAddress,
-	paymentDue: z.string().min(1),
 	paymentTerms: z.number(),
 	description: z.string().min(1),
 	items: z.array(itemInputSchema).min(1),
@@ -68,7 +66,6 @@ export const draftSchema = z.object({
 	clientName: z.string(),
 	clientEmail: z.union([z.email(), z.literal("")]),
 	clientAddress: addressSchema,
-	paymentDue: z.string(),
 	paymentTerms: z.number(),
 	description: z.string(),
 	items: z.array(
@@ -79,6 +76,8 @@ export const draftSchema = z.object({
 		}),
 	),
 });
+
+export type Status = z.infer<typeof invoiceSchema>["status"];
 
 export type NewInvoiceInput = z.infer<typeof sendSchema>;
 export type EditInvoiceInput = z.infer<typeof draftSchema>;

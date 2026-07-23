@@ -1,5 +1,4 @@
 "use client";
-
 import Image from "next/image";
 import logo from "@/public/assets/logo.svg";
 import avatar from "@/public/assets/image-avatar.jpg";

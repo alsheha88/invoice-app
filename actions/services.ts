@@ -1,85 +1,103 @@
 "use server";
-import { readFile, writeFile } from "fs/promises";
-import path from "path";
 import { buildInvoice } from "@/lib/utils";
 import {
 	EditInvoiceInput,
 	invoiceSchema,
-	invoicesSchema,
 	NewInvoiceInput,
 } from "@/schemas/schemas";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { prisma } from "@/lib/prisma";
 
 export const addInvoice = async (
 	invoice: NewInvoiceInput,
 	status: "pending" | "draft",
 ) => {
-	const filePath = path.join(process.cwd(), "lib", "data.json");
-	const rawData = await readFile(filePath, "utf-8");
-	const newInvoice = buildInvoice(invoice, status);
-	const validated = invoiceSchema.safeParse(newInvoice);
+	console.log("ACTION CALLED", invoice);
+	const builtInvoice = buildInvoice(invoice, status);
+	const validated = invoiceSchema.safeParse(builtInvoice);
 	if (!validated.success) throw new Error("Failed to build valid invoice");
-	const result = invoicesSchema.safeParse(JSON.parse(rawData));
-	if (!result.success) throw new Error("Invalid invoice data");
-	const invoices = result.data;
-	const newInvoices = [...invoices, validated.data];
-
-	await writeFile(filePath, JSON.stringify(newInvoices, null, 2), "utf-8");
+	await prisma.invoice.create({
+		data: {
+			id: builtInvoice.id,
+			clientName: builtInvoice.clientName,
+			clientEmail: builtInvoice.clientEmail,
+			senderAddress: builtInvoice.senderAddress,
+			clientAddress: builtInvoice.clientAddress,
+			createdAt: builtInvoice.createdAt,
+			status: builtInvoice.status,
+			paymentDue: builtInvoice.paymentDue,
+			paymentTerms: builtInvoice.paymentTerms,
+			description: builtInvoice.description,
+			items: {
+				create: builtInvoice.items.map((i) => ({
+					name: i.name,
+					price: i.price,
+					quantity: i.quantity,
+					total: i.total,
+				})),
+			},
+			total: builtInvoice.total,
+		},
+	});
 
 	revalidatePath("/");
 };
 
 export const editInvoice = async (id: string, invoice: EditInvoiceInput) => {
-	const filePath = path.join(process.cwd(), "lib", "data.json");
-	const rawData = await readFile(filePath, "utf-8");
-	const result = invoicesSchema.safeParse(JSON.parse(rawData));
-	if (!result.success) throw new Error("Can`t find invoice data");
-	const invoices = result.data;
-	const existing = invoices.find((i) => i.id === id);
+	const rebuilt = buildInvoice(invoice, "pending");
+	const validated = invoiceSchema.safeParse(rebuilt);
+	if (!validated.success) throw new Error("Failed to edit invoice");
+	const existing = await prisma.invoice.findUnique({
+		where: {
+			id: id
+		}
+	});
 	if (!existing) throw new Error("Invoice not found");
 
-	const rebuilt = buildInvoice(invoice, "pending");
-	const edited = { ...rebuilt, id, createdAt: existing.createdAt };
-
-	const validated = invoiceSchema.safeParse(edited);
-	if (!validated.success) throw new Error("Failed to edit invoice");
-
-	const mutatedInvoices = invoices.map((item) =>
-		item.id === id ? validated.data : item,
-	);
-	await writeFile(filePath, JSON.stringify(mutatedInvoices, null, 2), "utf-8");
+	await prisma.invoice.update({
+		where: {
+			id: id
+		},
+		data: {
+			clientName: validated.data.clientName,
+			clientEmail: validated.data.clientEmail,
+			senderAddress: validated.data.senderAddress,
+			clientAddress: validated.data.clientAddress,
+			createdAt: existing.createdAt,
+			status: validated.data.status,
+			paymentDue: validated.data.paymentDue,
+			paymentTerms: validated.data.paymentTerms,
+			description: validated.data.description,
+			items: {
+				deleteMany: {},
+				create: validated.data.items.map((i) => ({
+					name: i.name,
+					price: i.price,
+					quantity: i.quantity,
+					total: i.total,
+				})),
+			},
+			total: validated.data.total,
+			
+		},
+	})
 
 	revalidatePath("/");
 	revalidatePath(`/invoice/${id}`);
+};
+
+export const deleteInvoice = async (id: string) => {
+	await prisma.invoice.delete({ where: { id } });
+	revalidatePath("/");
+	redirect("/");
 };
 
 export const markAsPaid = async (id: string) => {
-	const filePath = path.join(process.cwd(), "lib", "data.json");
-	const rawData = await readFile(filePath, "utf-8");
-	const result = invoicesSchema.safeParse(JSON.parse(rawData));
-	if (!result.success) throw new Error("Can`t find invoice data");
-	const targetInvoice = result.data.find((inv) => inv.id === id);
-	if (!targetInvoice) throw new Error("Invoice not found");
-	const edited = { ...targetInvoice, status: "paid" as const };
-
-	const mutatedInvoices = result.data.map((item) =>
-		item.id === id ? edited : item,
-	);
-	await writeFile(filePath, JSON.stringify(mutatedInvoices, null, 2), "utf-8");
-
+	await prisma.invoice.update({
+		where: { id },
+		data: { status: "paid" },
+	});
 	revalidatePath("/");
 	revalidatePath(`/invoice/${id}`);
-};
-export const deleteInvoice = async (id: string) => {
-	const filePath = path.join(process.cwd(), "lib", "data.json");
-	const rawData = await readFile(filePath, "utf-8");
-	const result = invoicesSchema.safeParse(JSON.parse(rawData));
-	if (!result.success) throw new Error("Can`t find invoice data");
-
-	const updatedInvoices = result.data.filter((inv) => inv.id !== id);
-	await writeFile(filePath, JSON.stringify(updatedInvoices, null, 2), "utf-8");
-
-	revalidatePath("/");
-	redirect("/");
 };

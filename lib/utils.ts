@@ -7,15 +7,18 @@ export const cn = (...inputs: ClassValue[]) => {
 };
 
 export const generateId = () => {
-	return Array.from({ length: 2 }, () =>
-		String.fromCharCode(65 + Math.floor(Math.random() * 26)),
-	).join("") +
-		Array.from({ length: 4 }, () => Math.floor(Math.random() * 10)).join("");
+	return (
+		Array.from({ length: 2 }, () =>
+			String.fromCharCode(65 + Math.floor(Math.random() * 26)),
+		).join("") +
+		Array.from({ length: 4 }, () => Math.floor(Math.random() * 10)).join("")
+	);
 };
 
 export const getPaymentDue = (invoiceDate: string, paymentTerm: number) => {
-  const due = new Date(invoiceDate).getTime() + paymentTerm * 24 * 60 * 60 * 1000;
-  return new Date(due).toISOString().split("T")[0];
+	const due =
+		new Date(invoiceDate).getTime() + paymentTerm * 24 * 60 * 60 * 1000;
+	return new Date(due).toISOString().split("T")[0];
 };
 
 export const buildInvoice = (
@@ -37,4 +40,11 @@ export const buildInvoice = (
 		status,
 		total: items.reduce((acc, i) => (acc += i.total), 0),
 	};
+};
+
+export const formatAmount = (amount: number) => {
+	return new Intl.NumberFormat("en-GB", {
+		style: "currency",
+		currency: "GBP",
+	}).format(amount);
 };

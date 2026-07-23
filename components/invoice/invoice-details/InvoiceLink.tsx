@@ -1,6 +1,7 @@
 import { ChevronRight } from "lucide-react";
 import Link from "next/link";
 import StatusPill from "@/components/ui/StatusPill";
+import { formatAmount } from "@/lib/utils";
 
 type Props = {
 	id: string;
@@ -25,7 +26,7 @@ function InvoiceLink({ id, dueDate, client, amount, status }: Props) {
 			<p className="w-max justify-self-end text-sm text-secondary-foreground font-medium client">
 				{client}
 			</p>
-			<p className="text-foreground font-bold amount">£ {amount}</p>
+			<p className="text-foreground font-bold amount">{formatAmount(amount)}</p>
 			<div className="[grid-area:status]">
 				<StatusPill status={status} />
 			</div>

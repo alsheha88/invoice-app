@@ -1,5 +1,6 @@
 import { Invoice } from "@/schemas/schemas";
 import InvoiceTableFooter from "./InvoiceTableFooter";
+import { formatAmount } from "@/lib/utils";
 
 const tableHeaders = [
 	{ id: 1, title: "Item Name", style: "text-left" },
@@ -39,10 +40,10 @@ function InvoiceTable({ invoiceData }: Props) {
 									{item.quantity}
 								</td>
 								<td className="hidden sm:table-cell text-tertiary-foreground font-bold text-right">
-									£{item.price}
+									{formatAmount(item.price)}
 								</td>
 								<td className="text-foreground font-bold text-right align-top">
-									£{item.total}
+									{formatAmount(item.total)}
 								</td>
 							</tr>
 						))}

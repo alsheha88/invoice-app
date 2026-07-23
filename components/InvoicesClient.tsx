@@ -3,16 +3,19 @@ import { useState } from "react";
 import InvoiceForm from "./InvoiceForm";
 import PageHeader from "./PageHeader";
 import InvoiceLink from "./invoice/invoice-details/InvoiceLink";
-import { InvoicesData, NewInvoiceInput } from "@/schemas/schemas";
+import { InvoicesData, Status } from "@/schemas/schemas";
 import InvoiceEmptyState from "./InvoiceEmptyState";
 import { addInvoice } from "@/actions/services";
+import InvoiceFilterDropdown from "./InvoiceFilterDropdown";
 
 type Props = {
 	invoices: InvoicesData;
 };
 
 function InvoicesClient({ invoices }: Props) {
-	const [isOpen, setIsOpen] = useState(false);
+	const [isFormOpen, setIsFormOpen] = useState(false);
+	const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+	const [selectedStatus, setSelectedStatus] = useState<Status[]>([]);
 	const emptyValues = {
 		createdAt: new Date().toISOString().split("T")[0],
 		paymentTerms: 30,
@@ -24,18 +27,28 @@ function InvoicesClient({ invoices }: Props) {
 		paymentDue: "",
 		description: "",
 	};
-
+	const filteredInvoices = invoices.filter(
+		(inv) => selectedStatus.length === 0 || selectedStatus.includes(inv.status),
+	);
 	return (
 		<div className="flex flex-col gap-12 min-h-dvh">
 			<PageHeader
 				invoicesLength={invoices.length}
-				onNewInvoice={() => setIsOpen(true)}
-			/>
+				onNewInvoice={() => setIsFormOpen(true)}
+				isDropdownOpen={isDropdownOpen}
+				setIsDropdownOpen={setIsDropdownOpen}>
+				<InvoiceFilterDropdown
+					isOpen={isDropdownOpen}
+					selected={selectedStatus}
+					setSelected={setSelectedStatus}
+				/>
+			</PageHeader>
+
 			{invoices.length === 0 ? (
 				<InvoiceEmptyState />
 			) : (
 				<div className="grid gap-4">
-					{invoices.map((item) => (
+					{filteredInvoices.map((item) => (
 						<InvoiceLink
 							key={item.id}
 							id={item.id}
@@ -49,8 +62,8 @@ function InvoicesClient({ invoices }: Props) {
 			)}
 			<InvoiceForm
 				mode="add"
-				isOpen={isOpen}
-				setIsOpen={setIsOpen}
+				isOpen={isFormOpen}
+				setIsOpen={setIsFormOpen}
 				defaultValues={emptyValues}
 				action={addInvoice}
 			/>
